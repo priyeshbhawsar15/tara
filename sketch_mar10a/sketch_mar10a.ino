@@ -7,7 +7,8 @@
 
 int TouchSensor = D6;
 int led = LED_BUILTIN;
-int n=0;
+int n,p,q,l,out,flag;
+unsigned long StartTime;
 #include <ESP8266WiFi.h>
 #include <FirebaseArduino.h>
 
@@ -19,10 +20,10 @@ int n=0;
 
 
 void setup(){
-  Serial.begin(9600); // Communication speed
+  Serial.begin(9600);
   pinMode(led, OUTPUT);
   pinMode(TouchSensor, INPUT);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  /*WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.print("connecting");
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
@@ -32,23 +33,54 @@ void setup(){
   Serial.print("connected: ");
   Serial.println(WiFi.localIP());
   
-  Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+  Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);*/
 }
 
 void loop(){
-  if(digitalRead(TouchSensor)==HIGH)   
+  StartTime = millis();
+  //Serial.println(StartTime);
+  if((q-p)>-1000)
+  {
+    flag=1;
+  }
+  else
+  {
+    flag=0;
+  }
+  if(digitalRead(TouchSensor)==LOW)   
    { 
-    digitalWrite(led, HIGH);  
+    digitalWrite(led, HIGH);
+    p=StartTime;  
+    //Serial.println(p);
     n=1;
    }
   else
    {
     digitalWrite(led, LOW);    
-    Serial.println("Led OFF");
-    n=0;
+    //Serial.println("Led OFF");
+    q=StartTime;
+    //Serial.println(q);
    }
-  
-   Firebase.setFloat("value", n);
+   //Serial.println(q-p);
+   if((q-p)>1500)
+   {
+      out=3;
+      //Serial.println(out);
+   }
+   else if((q-p)<150 && flag==0)
+   {
+      out=1;
+      //Serial.println(out);
+   }
+   else if((q-p)<150 && flag==1)
+   {
+      out=2;
+      //Serial.println(out);
+   }
+  Serial.println(q-p+"        "+out+"         "+flag);
+  //Serial.println(flag);
+  /* Firebase.setFloat("value", n);
+   
  
   if (Firebase.failed()) {
       Serial.print("setting /number failed:");
@@ -62,6 +94,6 @@ void loop(){
       Serial.print("setting /number failed:");
       Serial.println(Firebase.error());  
       return;
-  }
-  delay(50); 
+  }*/
+  delay(100); 
 }
